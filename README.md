@@ -4,5 +4,5 @@
 
 Particle-controlled lego-parisian-restaurant with http-endpoints.
 
-Compilation and deployment (flasshing the mcu) is handled by travis-ci. 
+Compilation and deployment (flashing the mcu) is handled by travis-ci. 
 
