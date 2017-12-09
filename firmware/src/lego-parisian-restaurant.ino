@@ -19,52 +19,51 @@ int indoor_lights_state = 0;
 
 int DELAY_LOOP = 50;
 
-int toggle(int pin, int state) {
+int set_state(int pin, int state) {
     digitalWrite(pin, state);
     return state;
 }
 
 int toggle_outdoor_lights(String args) {
     int state = args.toInt();
-    outdoor_lights_state = toggle(outdoor_lights_pin, state);
-    return outdoor_lights_state;
-    
+    outdoor_lights_state = set_state(outdoor_lights_pin, state);
+    return outdoor_lights_state;   
 }
 
 int toggle_indoor_lights(String args) {
     int state = args.toInt();
-    indoor_lights_state = toggle(indoor_lights_pin, state);
+    indoor_lights_state = set_state(indoor_lights_pin, state);
     return indoor_lights_state;
 }
 
-void set_indoor_on() {
-    toggle(indoor_lights_pin, 1);
+int set_indoor_on(String args) {
+    return set_state(indoor_lights_pin, 1);
 }
 
-void set_indoor_off() {
-    toggle(indoor_lights_pin, 0);
+int set_indoor_off(String args) {
+    return set_state(indoor_lights_pin, 0);
 }
 
-void set_outdoor_on() {
-    toggle(outdoor_lights_pin, 1);
+int set_outdoor_on(String args) {
+    return set_state(outdoor_lights_pin, 1);
 }
 
-void set_outdoor_off() {
-    toggle(outdoor_lights_pin, 0);
+int set_outdoor_off(String args) {
+    return set_state(outdoor_lights_pin, 0);
 }
 
 void ready() {
     for(int k = 0; k < 5; k++){
-        set_indoor_on();
-        set_outdoor_off();
+        set_indoor_on("");
+        set_outdoor_off("");
         delay(100);
-        set_indoor_off();
-        set_outdoor_on();
+        set_indoor_off("");
+        set_outdoor_on("");
         delay(100);
     }
-    set_indoor_on();
-    set_outdoor_on();
-    // set_streetlight_on();
+    set_indoor_on("");
+    set_outdoor_on("");
+    // set_streetlight_on("");
 }
 
 
