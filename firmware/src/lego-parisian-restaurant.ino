@@ -19,38 +19,6 @@ int indoor_lights_state = 0;
 
 int DELAY_LOOP = 50;
 
-void setup() {
-
-    pinMode(outdoor_lights_pin, OUTPUT);
-    pinMode(indoor_lights_pin, OUTPUT);
-    // pinMode(street_light_pin, OUTPUT);
-    
-    Particle.function("set_indoor_on", set_indoor_on); // POST /v1/devices/{DEVICE_ID}/set_indoor_on
-    Particle.function("set_indoor_off", set_indoor_off); // POST /v1/devices/{DEVICE_ID}/set_indoor_off
-    Particle.function("set_outdoor_on", set_outdoor_on); // POST /v1/devices/{DEVICE_ID}/set_outdoor_on
-    Particle.function("set_outdoor_off", set_outdoor_off); // POST /v1/devices/{DEVICE_ID}/set_outdoor_off
-    // Particle.function("set_streetlight_on", set_streetlight_on); // POST /v1/devices/{DEVICE_ID}/set_streetlight_on
-    // Particle.function("set_streetlight_off", set_streetlight_off); // POST /v1/devices/{DEVICE_ID}/set_streetlight_off
-
-    // GET /v1/devices/{DEVICE_ID}/get_indoor_state
-    Particle.variable("get_indoor_state", &indoor_lights_state, INT);
-
-    // GET /v1/devices/{DEVICE_ID}/get_outdoor_state
-    Particle.variable("get_outdoor_state", &outdoor_lights_state, INT);
-    
-    // GET /v1/devices/{DEVICE_ID}/get_streetlight_state
-    // Particle.variable("get_streetlight_state", &street_lights_state, INT);
-
-    digitalWrite(outdoor_lights_pin, HIGH);
-    digitalWrite(indoor_lights_pin, HIGH);
-    // digitalWrite(street_lights_pin, HIGH);
-
-}
-
-void loop() {
-    delay(DELAY_LOOP);
-}
-
 int toggle(int pin, int state) {
     digitalWrite(pin, state);
     return state;
@@ -83,4 +51,48 @@ void set_outdoor_on() {
 
 void set_outdoor_off() {
     toggle(outdoor_lights_pin, 0);
+}
+
+void ready() {
+    for(int k = 0; k < 5; k++){
+        set_indoor_on();
+        set_outdoor_off();
+        delay(100);
+        set_indoor_off();
+        set_outdoor_on();
+        delay(100);
+    }
+    set_indoor_on();
+    set_outdoor_on();
+    // set_streetlight_on();
+}
+
+
+void setup() {
+
+    pinMode(outdoor_lights_pin, OUTPUT);
+    pinMode(indoor_lights_pin, OUTPUT);
+    // pinMode(street_light_pin, OUTPUT);
+    
+    Particle.function("set_indoor_on", set_indoor_on); // POST /v1/devices/{DEVICE_ID}/set_indoor_on
+    Particle.function("set_indoor_off", set_indoor_off); // POST /v1/devices/{DEVICE_ID}/set_indoor_off
+    Particle.function("set_outdoor_on", set_outdoor_on); // POST /v1/devices/{DEVICE_ID}/set_outdoor_on
+    Particle.function("set_outdoor_off", set_outdoor_off); // POST /v1/devices/{DEVICE_ID}/set_outdoor_off
+    // Particle.function("set_streetlight_on", set_streetlight_on); // POST /v1/devices/{DEVICE_ID}/set_streetlight_on
+    // Particle.function("set_streetlight_off", set_streetlight_off); // POST /v1/devices/{DEVICE_ID}/set_streetlight_off
+
+    // GET /v1/devices/{DEVICE_ID}/get_indoor_state
+    Particle.variable("get_indoor_state", &indoor_lights_state, INT);
+
+    // GET /v1/devices/{DEVICE_ID}/get_outdoor_state
+    Particle.variable("get_outdoor_state", &outdoor_lights_state, INT);
+    
+    // GET /v1/devices/{DEVICE_ID}/get_streetlight_state
+    // Particle.variable("get_streetlight_state", &street_lights_state, INT);
+
+    ready();
+}
+
+void loop() {
+    delay(DELAY_LOOP);
 }
