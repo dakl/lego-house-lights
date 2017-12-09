@@ -74,21 +74,21 @@ void setup() {
     pinMode(indoor_lights_pin, OUTPUT);
     // pinMode(street_light_pin, OUTPUT);
     
-    Particle.function("set_indoor_on", set_indoor_on); // POST /v1/devices/{DEVICE_ID}/set_indoor_on
-    Particle.function("set_indoor_off", set_indoor_off); // POST /v1/devices/{DEVICE_ID}/set_indoor_off
-    Particle.function("set_outdoor_on", set_outdoor_on); // POST /v1/devices/{DEVICE_ID}/set_outdoor_on
-    Particle.function("set_outdoor_off", set_outdoor_off); // POST /v1/devices/{DEVICE_ID}/set_outdoor_off
-    // Particle.function("set_streetlight_on", set_streetlight_on); // POST /v1/devices/{DEVICE_ID}/set_streetlight_on
-    // Particle.function("set_streetlight_off", set_streetlight_off); // POST /v1/devices/{DEVICE_ID}/set_streetlight_off
+    Particle.function("indoor_on", set_indoor_on); // POST /v1/devices/{DEVICE_ID}/indoor_on
+    Particle.function("indoor_off", set_indoor_off); // POST /v1/devices/{DEVICE_ID}/indoor_off
+    Particle.function("outdoor_on", set_outdoor_on); // POST /v1/devices/{DEVICE_ID}/outdoor_on
+    Particle.function("outdoor_off", set_outdoor_off); // POST /v1/devices/{DEVICE_ID}/outdoor_off
+    // Particle.function("streetlight_on", set_streetlight_on); // POST /v1/devices/{DEVICE_ID}/set_streetlight_on
+    // Particle.function("streetlight_off", set_streetlight_off); // POST /v1/devices/{DEVICE_ID}/set_streetlight_off
 
-    // GET /v1/devices/{DEVICE_ID}/get_indoor_state
-    Particle.variable("get_indoor_state", &indoor_lights_state, INT);
+    // GET /v1/devices/{DEVICE_ID}/get_indoor
+    Particle.variable("get_indoor", &indoor_lights_state, INT);
 
-    // GET /v1/devices/{DEVICE_ID}/get_outdoor_state
-    Particle.variable("get_outdoor_state", &outdoor_lights_state, INT);
+    // GET /v1/devices/{DEVICE_ID}/get_outdoor
+    Particle.variable("get_outdoor", &outdoor_lights_state, INT);
     
-    // GET /v1/devices/{DEVICE_ID}/get_streetlight_state
-    // Particle.variable("get_streetlight_state", &street_lights_state, INT);
+    // GET /v1/devices/{DEVICE_ID}/get_street
+    // Particle.variable("get_street", &street_lights_state, INT);
 
     ready();
 }
