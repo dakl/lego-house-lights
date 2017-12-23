@@ -4,17 +4,16 @@ install:
   - sudo apt-get update
   - sudo apt-get install expect
   - npm install -g particle-cli
-  - curl https://github.com/dakl/ci-scripts/bootstrap.sh | bash
 
 before_script:
-  - ./ci-scripts/ci-particle.py login
+  - ./particle-cli-login.sh $EMAIL $PASS
 
 script:
-  - ./ci-scripts/ci-particle.py build
+  - particle compile photon firmware --saveTo photon_firmware.bin
 
 deploy:
   provider: script
   skip_cleanup: true
-  script: ./ci-scripts/ci-particle.py flash
+  script: particle flash $DEVICE_ID photon_firmware.bin
   on:
     branch: master
