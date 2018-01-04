@@ -24,31 +24,23 @@ int set_state(int pin, int state) {
     return state;
 }
 
-int toggle_outdoor_lights(String args) {
-    int state = args.toInt();
-    outdoor_lights_state = set_state(outdoor_lights_pin, state);
-    return outdoor_lights_state;   
-}
-
-int toggle_indoor_lights(String args) {
-    int state = args.toInt();
-    indoor_lights_state = set_state(indoor_lights_pin, state);
-    return indoor_lights_state;
-}
-
 int set_indoor_on(String args) {
+    indoor_lights_state = 1
     return set_state(indoor_lights_pin, 1);
 }
 
 int set_indoor_off(String args) {
+    indoor_lights_state = 0
     return set_state(indoor_lights_pin, 0);
 }
 
 int set_outdoor_on(String args) {
+    outdoor_lights_state = 1
     return set_state(outdoor_lights_pin, 1);
 }
 
 int set_outdoor_off(String args) {
+    outdoor_lights_state = 0
     return set_state(outdoor_lights_pin, 0);
 }
 
