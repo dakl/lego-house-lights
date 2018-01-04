@@ -25,22 +25,22 @@ int set_state(int pin, int state) {
 }
 
 int set_indoor_on(String args) {
-    indoor_lights_state = 1
+    indoor_lights_state = 1;
     return set_state(indoor_lights_pin, 1);
 }
 
 int set_indoor_off(String args) {
-    indoor_lights_state = 0
+    indoor_lights_state = 0;
     return set_state(indoor_lights_pin, 0);
 }
 
 int set_outdoor_on(String args) {
-    outdoor_lights_state = 1
+    outdoor_lights_state = 1;
     return set_state(outdoor_lights_pin, 1);
 }
 
 int set_outdoor_off(String args) {
-    outdoor_lights_state = 0
+    outdoor_lights_state = 0;
     return set_state(outdoor_lights_pin, 0);
 }
 
