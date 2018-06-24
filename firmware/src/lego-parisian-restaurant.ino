@@ -9,15 +9,21 @@
 // LEGO Parisian Restaurant Light Automation
 // ------------
 
-int outdoor_lights_pin = D6; 
-int indoor_lights_pin = D5; 
+int time_to_live = 16777215;
+
+int outdoor_lights_pin = D6;
+int indoor_lights_pin = D5;
 // int street_light_pin = D4; // not yet added in hw
 
 int outdoor_lights_state = 0;
 int indoor_lights_state = 0;
 // int street_light_state = 0;
 
-int DELAY_LOOP = 50;
+void reset_handler()
+{
+    // tell the world what we are doing
+    Particle.publish("reset", "going down for reboot NOW!", ttl);
+}
 
 int set_state(int pin, int state) {
     digitalWrite(pin, state);
@@ -60,6 +66,10 @@ void ready() {
 
 
 void setup() {
+    Particle.publish("booting", "Lego house lights are setting up.", time_to_live);
+
+    // register the reset handler
+    System.on(reset, reset_handler);
 
     pinMode(outdoor_lights_pin, OUTPUT);
     pinMode(indoor_lights_pin, OUTPUT);
@@ -84,6 +94,4 @@ void setup() {
     ready();
 }
 
-void loop() {
-    delay(DELAY_LOOP);
-}
+void loop() {}
