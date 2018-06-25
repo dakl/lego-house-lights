@@ -12,6 +12,7 @@
 int time_to_live = 16777215;
 
 int PINS[] = {D0, D1, D2, D3};
+int PINCOUNT = sizeof(PINS)/sizeof(PINS[0]);
 int INITIAL_STATES[] = {0, 0, 0, 0};
 
 void reset_handler()
@@ -74,17 +75,18 @@ int pinState(String args)
 
 void ready() {
     for(int k = 0; k < 5; k++){
-        for (int i=0; i<arraySize(PINS); i++) {
+        Particle.publish("on", "Turning on.", time_to_live);
+        for (int i = 0; i < PINCOUNT; i++) {
             digitalWrite(PINS[i], HIGH);
         }
         delay(100);
-        for (int i=0; i<arraySize(PINS); i++) {
+        for (int i = 0; i < PINCOUNT; i++) {
             digitalWrite(PINS[i], LOW);
         }
         delay(100);
     }
 
-    Particle.publish("booted", "particle-relay-hub is ready.", time_to_live);
+    Particle.publish("booted", "lego-house-lights is ready.", time_to_live);
 }
 
 
@@ -94,7 +96,7 @@ void setup() {
     // register the reset handler
     System.on(reset, reset_handler);
 
-    for (int i=0; i<arraySize(PINS); i++) {
+    for (int i=0; i<PINCOUNT; i++) {
         pinMode(PINS[i], OUTPUT);
     }
 
