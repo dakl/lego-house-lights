@@ -15,6 +15,9 @@ int PINS[] = {D0, D1, D2, D3};
 int PINCOUNT = sizeof(PINS)/sizeof(PINS[0]);
 int INITIAL_STATES[] = {0, 0, 0, 0};
 
+int FAILED_TO_PARSE_PIN = -100;
+int FAILED_TO_PARSE_STATE = -200;
+
 void reset_handler()
 {
     // tell the world what we are doing
@@ -45,14 +48,14 @@ int pinControl(String command)
     Particle.publish("set_state", "Setting state using command " + command, time_to_live);
     // parse the relay number
     int pinIndex = getPinIndex(command);
-    if (pinIndex == -1) return -1;
+    if (pinIndex == -1) return FAILED_TO_PARSE_PIN;
     int pin = PINS[pinIndex];
 
     // find out the state of the relay
     int state = 0;
     if (command.substring(2,6) == "HIGH") state = 1;
     else if (command.substring(2,5) == "LOW") state = 0;
-    else return -1;
+    else return FAILED_TO_PARSE_STATE;
 
     // write to the appropriate relay
     digitalWrite(pin, state);
@@ -71,8 +74,8 @@ int pinState(String args)
 {
     Particle.publish("get_state", "Reading pin " + args +  " state.", time_to_live);
     // parse the relay number
-    int pinIndex = getPinIndex(args);    
-    if (pinIndex == -1) return -1;
+    int pinIndex = getPinIndex(args);
+    if (pinIndex == -1) return FAILED_TO_PARSE_PIN;
 
     return digitalRead(PINS[pinIndex]);
 }
