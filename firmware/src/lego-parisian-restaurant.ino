@@ -23,8 +23,10 @@ void reset_handler()
 
 int getPinIndex(String command)
 {
+    Particle.publish("get_pin_index", "Getting pin index from args " + command, time_to_live);
     // parse the relay number
-    int pinIndex = command.charAt(1) - '0';
+    int pinIndex = command.charAt(0) - '0';
+    Particle.publish("get_pin_index", "Pin index was " + String(pinIndex) , time_to_live);    
     // do a sanity check
     if (pinIndex < 0 || pinIndex > 3) return -1;
     else return pinIndex;
@@ -40,6 +42,7 @@ curl https://api.particle.io/v1/devices/0123456789abcdef/pin \
 */
 int pinControl(String command)
 {
+    Particle.publish("set_state", "Setting state using command " + command, time_to_live);
     // parse the relay number
     int pinIndex = getPinIndex(command);
     if (pinIndex == -1) return -1;
@@ -66,8 +69,9 @@ curl https://api.particle.io/v1/devices/0123456789abcdef/state \
 */
 int pinState(String args)
 {
+    Particle.publish("get_state", "Reading pin " + args +  " state.", time_to_live);
     // parse the relay number
-    int pinIndex = getPinIndex(args);
+    int pinIndex = getPinIndex(args);    
     if (pinIndex == -1) return -1;
 
     return digitalRead(PINS[pinIndex]);
