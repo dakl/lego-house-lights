@@ -24,15 +24,26 @@ void reset_handler()
     Particle.publish("reset", "going down for reboot NOW!", time_to_live);
 }
 
-int getPinIndex(String command)
+int getPinIndex(String args)
 {
-    Particle.publish("get_pin_index", "Getting pin index from args " + command, time_to_live);
+    Particle.publish("get_pin_index", "Getting pin index from args " + args, time_to_live);
     // parse the relay number
-    int pinIndex = command.charAt(0) - '0';
+    int pinIndex = args.charAt(0) - '0';
     Particle.publish("get_pin_index", "Pin index was " + String(pinIndex) , time_to_live);    
     // do a sanity check
     if (pinIndex < 0 || pinIndex > 3) return -1;
     else return pinIndex;
+}
+
+int getValue(String args)
+{
+    unsigned int pinIndex, value;    
+    int n = sscanf(args, "%u,%u", &pinIndex, &value);
+
+    Particle.publish("got_value", "value is " + String(value), time_to_live);    
+    // do a sanity check
+    if (value < 0 || value > 1) return -1;
+    else return value;
 }
 
 /*
@@ -43,23 +54,19 @@ POST /v1/devices/{DEVICE_ID}/pin
 curl https://api.particle.io/v1/devices/0123456789abcdef/pin \
 -d access_token=123412341234 -d params=1,HIGH
 */
-int pinControl(String command)
+int pinControl(String args)
 {
-    Particle.publish("set_state", "Setting state using command " + command, time_to_live);
+    Particle.publish("set_state", "Setting state using args " + args, time_to_live);
     // parse the relay number
-    int pinIndex = getPinIndex(command);
+    int pinIndex = getPinIndex(args);
     if (pinIndex == -1) return FAILED_TO_PARSE_PIN;
     int pin = PINS[pinIndex];
 
     // find out the state of the relay
-    int state = 0;
-    if (command.substring(2,6) == "HIGH") state = 1;
-    else if (command.substring(2,5) == "LOW") state = 0;
-    else return FAILED_TO_PARSE_STATE;
+    int value = getValue(args);
+    if (value == -1) return FAILED_TO_PARSE_STATE;
 
-    // write to the appropriate relay
-    digitalWrite(pin, state);
-
+    digitalWrite(pin, value);
     return 1;
 }
 
@@ -81,8 +88,8 @@ int pinState(String args)
 }
 
 void ready() {
+    Particle.publish("on", "Turning on.", time_to_live);
     for(int k = 0; k < 5; k++){
-        Particle.publish("on", "Turning on.", time_to_live);
         for (int i = 0; i < PINCOUNT; i++) {
             digitalWrite(PINS[i], HIGH);
         }
@@ -92,13 +99,12 @@ void ready() {
         }
         delay(100);
     }
-
     Particle.publish("booted", "lego-house-lights is ready.", time_to_live);
 }
 
 
 void setup() {
-    Particle.publish("booting", "Lego house lights are setting up.", time_to_live);
+    Particle.publish("booting", "lego-house-lights is setting up.", time_to_live);
 
     // register the reset handler
     System.on(reset, reset_handler);
