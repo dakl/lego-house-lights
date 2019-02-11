@@ -6,120 +6,120 @@
  */
 
 // ------------
-// LEGO Parisian Restaurant Light Automation
+// LEGO Modular Building Lights Control
 // ------------
 
-int time_to_live = 16777215;
+#include "MQTT.h"
+
+/* ======================= prototypes =============================== */
+
+void callback(char *topic, byte *payload, unsigned int length);
+int setState(int relayNumber, int relayState);
+
+/* ======================= main.ino ======================== */
+
+MQTT client("worker0", 1883, callback);
+
+char *COMMANDS_TOPICS = "commands/lego/#";
+char *EVENTS_TOPIC_TEMPLATE = "events/lego/";
+
+int ttl = 16777215;
 
 int PINS[] = {D0, D1, D2, D3};
-int PINCOUNT = sizeof(PINS)/sizeof(PINS[0]);
-int INITIAL_STATES[] = {0, 0, 0, 0};
+int STATES[] = {0, 0, 0, 0};
 
 int FAILED_TO_PARSE_PIN = -100;
 int FAILED_TO_PARSE_STATE = -200;
 
+void callback(char *_topic, byte *payload, unsigned int length)
+{
+    char p[length + 1];
+    memcpy(p, payload, length);
+    p[length] = NULL;
+
+    Particle.publish("event_callback", "handing payload: " + String(p), ttl);
+
+    String topic = String(_topic);
+    int relayNumber = topic.charAt(topic.length() - 1) - '0';
+
+    if (String("ON").equals(p))
+    {
+        setState(relayNumber, HIGH);
+        client.publish(String(EVENTS_TOPIC_TEMPLATE) + String(relayNumber), "ON", true);
+    }
+    else if (String("OFF").equals(p))
+    {
+        setState(relayNumber, LOW);
+        client.publish(String(EVENTS_TOPIC_TEMPLATE) + String(relayNumber), "OFF", true);
+    }
+}
+
+
 void reset_handler()
 {
     // tell the world what we are doing
-    Particle.publish("reset", "going down for reboot NOW!", time_to_live);
+    Particle.publish("reset", "going down for reboot NOW!", ttl);
 }
 
-int getPinIndex(String args)
+int setState(int relayNumber, int relayState)
 {
-    Particle.publish("get_pin_index", "Getting pin index from args " + args, time_to_live);
-    // parse the relay number
-    int pinIndex = args.charAt(0) - '0';
-    Particle.publish("get_pin_index", "Pin index was " + String(pinIndex) , time_to_live);    
-    // do a sanity check
-    if (pinIndex < 0 || pinIndex > 3) return -1;
-    else return pinIndex;
+    // write to the appropriate relay
+    digitalWrite(PINS[relayNumber - 1], relayState);
+
+    // update states variable
+    STATES[relayNumber - 1] = relayState;
+
+    return 0;
 }
 
-int getValue(String args)
-{
-    unsigned int pinIndex, value;    
-    int n = sscanf(args, "%u,%u", &pinIndex, &value);
-
-    Particle.publish("got_value", "value is " + String(value), time_to_live);    
-    // do a sanity check
-    if (value < 0 || value > 1) return -1;
-    else return value;
-}
-
-/*
-command format: pinIndex,state
-examples: `0,HIGH`, `3,LOW`
-POST /v1/devices/{DEVICE_ID}/pin
-# EXAMPLE REQUEST
-curl https://api.particle.io/v1/devices/0123456789abcdef/pin \
--d access_token=123412341234 -d params=1,HIGH
-*/
-int pinControl(String args)
-{
-    Particle.publish("set_state", "Setting state using args " + args, time_to_live);
-    // parse the relay number
-    int pinIndex = getPinIndex(args);
-    if (pinIndex == -1) return FAILED_TO_PARSE_PIN;
-    int pin = PINS[pinIndex];
-
-    // find out the state of the relay
-    int value = getValue(args);
-    if (value == -1) return FAILED_TO_PARSE_STATE;
-
-    digitalWrite(pin, value);
-    return 1;
-}
-
-/*
-command format: 1 (range 0 to 3)
-POST /v1/devices/{DEVICE_ID}/state
-# EXAMPLE REQUEST
-curl https://api.particle.io/v1/devices/0123456789abcdef/state \
--d access_token=123412341234 -d params=1
-*/
-int pinState(String args)
-{
-    Particle.publish("get_state", "Reading pin " + args +  " state.", time_to_live);
-    // parse the relay number
-    int pinIndex = getPinIndex(args);
-    if (pinIndex == -1) return FAILED_TO_PARSE_PIN;
-
-    return digitalRead(PINS[pinIndex]);
-}
 
 void ready() {
-    Particle.publish("on", "Turning on.", time_to_live);
+    Particle.publish("on", "Turning on.", ttl);
+
+
     for(int k = 0; k < 5; k++){
-        for (int i = 0; i < PINCOUNT; i++) {
-            digitalWrite(PINS[i], HIGH);
+        for (int pin : PINS) {
+            digitalWrite(pin, HIGH);
         }
         delay(100);
-        for (int i = 0; i < PINCOUNT; i++) {
-            digitalWrite(PINS[i], LOW);
+        for (int pin : PINS) {
+            digitalWrite(pin, LOW);
         }
         delay(100);
     }
-    Particle.publish("booted", "lego-house-lights is ready.", time_to_live);
+    Particle.publish("booted", "lego-house-lights is ready.", ttl);
 }
 
 
 void setup() {
-    Particle.publish("booting", "lego-house-lights is setting up.", time_to_live);
+    Particle.publish("booting", "lego-house-lights is setting up.", ttl);
 
     // register the reset handler
     System.on(reset, reset_handler);
 
-    for (int i=0; i<PINCOUNT; i++) {
-        pinMode(PINS[i], OUTPUT);
+    for (int pin : PINS)
+    {
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, LOW);
     }
 
-    // register control function
-    Particle.function("pin", pinControl);
+    // // connect to the mqtt broker
+    client.connect("lego-house-sparkclient");
 
-    // register state function
-    Particle.function("state", pinState);
+    // publish/subscribe
+    if (client.isConnected())
+    {
+        Particle.publish("MQTT: connected", PRIVATE);
+
+        client.publish(String(EVENTS_TOPIC_TEMPLATE) + "general", "Lego Buildings came online.");
+        client.subscribe(COMMANDS_TOPICS);
+    }
 
     ready();
 }
 
-void loop() {}
+void loop()
+{
+    if (client.isConnected())
+        client.loop();
+}
