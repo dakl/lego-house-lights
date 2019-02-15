@@ -37,8 +37,6 @@ void callback(char *_topic, byte *payload, unsigned int length)
     memcpy(p, payload, length);
     p[length] = NULL;
 
-    Particle.publish("event_callback", "handing payload: " + String(p), ttl);
-
     String topic = String(_topic);
     int relayNumber = topic.charAt(topic.length() - 1) - '0';
 
@@ -74,9 +72,6 @@ int setState(int relayNumber, int relayState)
 
 
 void ready() {
-    Particle.publish("on", "Turning on.", ttl);
-
-
     for(int k = 0; k < 5; k++){
         for (int pin : PINS) {
             digitalWrite(pin, HIGH);
@@ -92,8 +87,6 @@ void ready() {
 
 
 void setup() {
-    Particle.publish("booting", "lego-house-lights is setting up.", ttl);
-
     // register the reset handler
     System.on(reset, reset_handler);
 
